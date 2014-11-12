@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iomanip>
 #include <math.h>
+#include <vector>
 using namespace std;
 
 ofstream out("Output.txt");
@@ -11,35 +12,36 @@ double function(double x)
 	return cos(x*x);
 }
 
-void print_vector(double* vector, int n)
+template <typename T>
+void print_vector(vector<T> &vect)
 {
-	for(int i=0;i<n;++i)
-		out << setiosflags(ios::left) << setw(10) << setprecision(5) << vector[i];
+	for(int i=0;i<vect.size();++i)
+		out << setiosflags(ios::left) << setw(10) << setprecision(5) << vect[i];
 	out << endl;
 }
 
-double* fill_x(double start, double end, int n)
+vector<double> fill_x(double start, double end, int n)
 {
-	double* x = new double[n+1];
+	vector<double> x = vector<double>(n+1);
 	double h = (end - start)/n;
-	for(int i=0;i<=n;++i)
+	for(int i=0;i<x.size();++i)
 		x[i] = start + i*h;
 	return x;
 }
 
-double* fill_f(double* x, int x_number)
+vector<double> fill_f(vector<double> &x)
 {
-	double* f = new double[x_number];
-	for(int i=0;i<x_number;++i)
+	vector<double> f = vector<double>(x.size());
+	for(int i=0;i<x.size();++i)
 		f[i] = function(x[i]);
 	return f;
 }
 
-double* countSimpleSweep(int number, double* a, double* b, double* c, double* F)
+vector<double> countSimpleSweep(int number, vector<double> &a, vector<double> &b, vector<double> &c, vector<double> &F)
 {
-	double* result = new double[number];
-	double* alpha = new double[number];
-	double* beta = new double[number];
+	vector<double> result = vector<double>(number);
+	vector<double> alpha = vector<double>(number);
+	vector<double> beta = vector<double>(number);
 	alpha[0] = b[0]/c[0];
 	beta[0] = F[0]/c[0];
 	double del;
@@ -55,14 +57,43 @@ double* countSimpleSweep(int number, double* a, double* b, double* c, double* F)
 	return result;
 }
 
+double h(vector<double> &x, int i)
+{
+    return x[i] - x[i-1];
+}
+
+void fill_sweep_vectors(vector<double> &a, vector<double> &b, vector<double> &F, vector<double> x, vector<double> f)
+{
+    double temp = 0.;
+    int N = b.size();
+    for(int i=1;i<=N;++i)
+    {
+        temp = 2*(h(x, i) + h(x, i+1));
+        a[i-1] = -h(x, i)/temp;
+        b[i] = -h(x, i+1)/temp;
+        F[i] = 6/temp*((f[i+1] - f[i])/h(x, i+1) - (f[i] - f[i-1])/h(x, i));
+    }
+    b[0] = 0.;
+    F[0] = 0.;
+    a[N-1] = 0.;
+    F[N] = 0.;
+}
+
 int main()
 {
 	int n = 20;
-	double a = 1.;
-	double b = 3.;
-	double* x = fill_x(a, b, n);
-	double* f = fill_f(x, n+1);
-	print_vector(x, n+1);
-	print_vector(f, n+1);
+	double start = 1.;
+	double end = 3.;
+	vector<double> x = fill_x(start, end, n);
+	vector<double> f = fill_f(x);
+	print_vector(x);
+	print_vector(f);
+	vector<double> a = vector<double>(n-1);
+	vector<double> b = vector<double>(n-1);
+	vector<double> c = vector<double>(n, 1);
+	vector<double> F = vector<double>(n);
+	fill_sweep_vectors(a, b, F, x, f);
+	vector<double> result = countSimpleSweep(n, a, b, c, F);
+	print_vector(result);
 	return 0;
 }

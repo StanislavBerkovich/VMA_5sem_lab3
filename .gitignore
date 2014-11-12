@@ -1,11 +1,4 @@
-<<<<<<< HEAD
 /bin
 /obj
 /*.cbp
-=======
-/Debug/*
-/VMA_5sem_lab3/Debug/*
-/*.opensdf
-/*.sdf
-/*.suo
->>>>>>> 566d21070df2af132aa4996d567b028915774e6c
+/*.depend
