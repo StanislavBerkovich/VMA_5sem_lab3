@@ -79,6 +79,16 @@ void fill_sweep_vectors(vector<double> &a, vector<double> &b, vector<double> &F,
     F[N] = 0.;
 }
 
+double P3(int i, double val, vector<double> &x, vector<double> &f, vector<double> &M)
+{
+    double result = 0.;
+    result = M[i-1]*powf(x[i] - val, 3.)/(6*h(x, i));
+    result += M[i]*powf(val - x[i-1], 3.)/(6*h(x, i));
+    result +=(f[i-1] - powf(h(x, i), 2.)/6*M[i-1])*(x[i] - val)/h(x, i);
+    result += (f[i] - M[i]*powf(h(x, i), 2.)/6*M[i])*(val - x[i-1])/h(x, i);
+    return result;
+}
+
 int main()
 {
 	int n = 20;
@@ -93,7 +103,11 @@ int main()
 	vector<double> c = vector<double>(n, 1);
 	vector<double> F = vector<double>(n);
 	fill_sweep_vectors(a, b, F, x, f);
-	vector<double> result = countSimpleSweep(n, a, b, c, F);
-	print_vector(result);
+	vector<double> M = countSimpleSweep(n, a, b, c, F);
+	print_vector(M);
+	vector<double> tmp = vector<double>(n);
+	for(int i=1;i<=n;++i)
+        tmp[i-1] = P3(i, x[i], x, f, M);
+	print_vector(tmp);
 	return 0;
 }
